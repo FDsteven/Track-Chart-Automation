@@ -34,6 +34,7 @@ grade_line.insert(loc=4, column='LENGTH (FT)', value=grade_curve_length)
 grade_line.insert(loc=5, column='CURVE NUMBER', value=grade_curve_number)
 grade_line.insert(loc=6, column='DIRECTION', value=grade_curve_direction)
 grade_line.insert(loc=7, column='DEG OF CURVE', value=grade_degree_of_curve)
+print(grade_line)
 curve_grade = np.zeros(len(curve_line))
 curve_speed = np.zeros(len(curve_line))
 curve_line.insert(loc=3, column='SPEED', value=curve_speed)
@@ -52,5 +53,21 @@ speed_line.insert(loc=8, column='GRADE_TO_NEXT', value=speed_grade)
 consolidate = pd.concat([grade_line, curve_line, speed_line])
 consolidate = consolidate.sort_values(['BEG MP', 'END MP'], ascending=[True, True])
 consolidate =consolidate.reset_index()
-consolidate=consolidate.drop(['index'], axis=1)
+consolidate_copy = consolidate
+consolidate_copy.to_csv("before_speed.csv")
 print(consolidate)
+length = len(consolidate)
+Speed_slice = consolidate["SPEED"]
+for i in range(length):
+    if consolidate.loc[i,"SPEED"] <= 0: 
+        speed_slice = Speed_slice[0:i+1]
+        speed_index = speed_slice[speed_slice != 0].index[-1]
+        consolidate.loc[i,"SPEED"] = consolidate.loc[speed_index,"SPEED"]
+        # for j in range(i+1):
+        #     if consolidate.loc[i-j,"SPEED"] > 0:
+        #         store_speed = consolidate.loc[i-j,"SPEED"]
+        # consolidate.loc[i,"SPEED"] = store_speed
+consolidate.to_csv("after_speed.csv")
+combined = pd.concat([consolidate])
+
+
