@@ -148,7 +148,7 @@ def line_segment_loader(num):
     for i in range(len(new_data)-1):
         new_data.loc[i + 1,"ELEV (M)"] = new_data.loc[i,"ELEV (M)"] + new_data.loc[i + 1,"LENGTH (M)"] * new_data.loc[i + 1,"GRADE_TO_NEXT"] / 100
     print(new_data)
-    fig, ax = plt.subplots(2, 1, sharex=True)
+    fig, ax = plt.subplots(4, 1, sharex=True)
     ax[0].plot(
         np.array(new_data["END MP"]), 
         np.array(new_data["ELEV (M)"]),
@@ -165,7 +165,24 @@ def line_segment_loader(num):
     )
     ax[1].set_ylabel('speed')
     ax[1].legend()
-    ax[0].set_xlabel('MP')
+    ax[2].plot(
+        np.array(new_data["END MP"]), 
+        np.array(new_data["DEG OF CURVE"]),
+        label="Track Curvature"
+    )
+    ax[2].set_ylabel('Degree')
+    # ax[0].set_ylim([150, 850])
+    ax[2].legend()
+    ax[2].set_xlabel('MP')
+    ax[3].plot(
+        np.array(new_data["END MP"]), 
+        np.array(new_data["GRADE_TO_NEXT"]),
+        label="Track Curvature"
+    )
+    ax[3].set_ylabel('Grade')
+    # ax[0].set_ylim([150, 850])
+    ax[3].legend()
+    ax[3].set_xlabel('MP')
     plt.tight_layout()
     plt.show()
     new_data.to_csv("after_curve.csv")
@@ -173,6 +190,7 @@ def line_segment_loader(num):
     return new_data
 line_segments = [1,2,3]
 line_segments = grades["LINE_SEGMENT"].unique()
+line_segments = [485]
 for line_segment in line_segments:
     line_segment_name = str(line_segment)
     document_name = "line segment " + line_segment_name + " .csv"
