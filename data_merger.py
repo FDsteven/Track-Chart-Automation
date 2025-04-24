@@ -166,16 +166,16 @@ def line_segment_loader(num):
     ax[1].set_ylabel('speed')
     ax[1].legend()
     ax[0].set_xlabel('MP')
-    fig, ax = plt.subplots(2, 1, sharex=True)
     plt.tight_layout()
     plt.show()
     new_data.to_csv("after_curve.csv")
     consolidate.to_csv("after_speed.csv")
     return new_data
 line_segments = [1,2,3]
+line_segments = grades["LINE_SEGMENT"].unique()
 for line_segment in line_segments:
     line_segment_name = str(line_segment)
     document_name = "line segment " + line_segment_name + " .csv"
     Line_segment_df = line_segment_loader(line_segment)
     Line_segment_df.to_csv(document_name)
-
+line_segments = grades["LINE_SEGMENT"].unique()
