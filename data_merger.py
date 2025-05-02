@@ -193,7 +193,7 @@ line_segments = grades["LINE_SEGMENT"].unique()
 line_segments = [485]
 for line_segment in line_segments:
     line_segment_name = str(line_segment)
-    document_name = "line segment " + line_segment_name + " .csv"
+    document_name = "line segment " + line_segment_name + ".csv"
     Line_segment_df = line_segment_loader(line_segment)
     Line_segment_df.to_csv(document_name)
 line_segments = grades["LINE_SEGMENT"].unique()
