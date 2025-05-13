@@ -21,7 +21,7 @@ def line_segment_loader(num):
     line_segment_number = num
     grade_line = grades[grades["LINE_SEGMENT"]==line_segment_number]
     grade_line = grade_line[["LINE_SEGMENT","BEG MP","GRADE_TO_NEXT"]]
-    print(grade_line)
+    # print(grade_line)
     grade_end_mp = []
     curve_line = curves[curves["LINE_SEGMENT"]==line_segment_number]
     curve_line = curve_line[["LINE_SEGMENT","BEG MP","END MP","LENGTH (FT)","CURVE NUMBER","DIRECTION","DEG OF CURVE"]]
@@ -35,7 +35,23 @@ def line_segment_loader(num):
     grade_line = grade_line.reset_index(drop=True)    
     for i in range(len(grade_line)-1):
         grade_end_mp.append(grade_line.loc[i+1,"BEG MP"])
-    grade_end_mp.append(speed_line.loc[len(speed_line)-1,"END MP"])
+    if len(speed_line) >= 1:
+        speed_curve_length = np.zeros(len(speed_line))
+        speed_curve_number = np.zeros(len(speed_line))
+        speed_curve_direction = np.zeros(len(speed_line))
+        speed_degree_of_curve = np.zeros(len(speed_line))
+        speed_grade = np.zeros(len(speed_line))
+        speed_line.insert(loc=3,column='SPEED', value=speed_line_speed)
+        speed_line.insert(loc=4, column='LENGTH (FT)', value=speed_curve_length)
+        speed_line.insert(loc=5, column='CURVE NUMBER', value=speed_curve_number)
+        speed_line.insert(loc=6, column='DIRECTION', value=speed_curve_direction)
+        speed_line.insert(loc=7, column='DEG OF CURVE', value=speed_degree_of_curve)
+        speed_line.insert(loc=8, column='GRADE_TO_NEXT', value=speed_grade)
+        speed_line.insert(loc=9, column='SPEED_INDI', value="speed")
+        grade_end_mp.append(speed_line.loc[len(speed_line)-1,"END MP"])
+    else:
+        grade_end_mp.append(grade_end_mp[-1] + 0.1)
+        print("Fabricated Line Segment " + str(num) + " final MP")
     grade_speed = np.zeros(len(grade_line))
     grade_curve_length = np.zeros(len(grade_line))
     grade_curve_number = np.zeros(len(grade_line))
@@ -48,40 +64,34 @@ def line_segment_loader(num):
     grade_line.insert(loc=6, column='DIRECTION', value=grade_curve_direction)
     grade_line.insert(loc=7, column='DEG OF CURVE', value=grade_degree_of_curve)
     grade_line.insert(loc=9, column='SPEED_INDI', value="non_speed")
-    print(grade_line)
+    # print(grade_line)
     curve_grade = np.zeros(len(curve_line))
     curve_speed = np.zeros(len(curve_line))
     curve_line.insert(loc=3, column='SPEED', value=curve_speed)
     curve_line.insert(loc=8, column='GRADE_TO_NEXT', value=curve_grade)
     curve_line.insert(loc=9, column='SPEED_INDI', value="non_speed")
-    speed_curve_length = np.zeros(len(speed_line))
-    speed_curve_number = np.zeros(len(speed_line))
-    speed_curve_direction = np.zeros(len(speed_line))
-    speed_degree_of_curve = np.zeros(len(speed_line))
-    speed_grade = np.zeros(len(speed_line))
-    speed_line.insert(loc=3,column='SPEED', value=speed_line_speed)
-    speed_line.insert(loc=4, column='LENGTH (FT)', value=speed_curve_length)
-    speed_line.insert(loc=5, column='CURVE NUMBER', value=speed_curve_number)
-    speed_line.insert(loc=6, column='DIRECTION', value=speed_curve_direction)
-    speed_line.insert(loc=7, column='DEG OF CURVE', value=speed_degree_of_curve)
-    speed_line.insert(loc=8, column='GRADE_TO_NEXT', value=speed_grade)
-    speed_line.insert(loc=9, column='SPEED_INDI', value="speed")
     consolidate = pd.concat([grade_line, curve_line, speed_line])
     consolidate = consolidate.sort_values(['BEG MP', 'END MP', 'SPEED_INDI'], ascending=[True, True, True])
     consolidate =consolidate.reset_index()
     consolidate_copy = consolidate
     consolidate_copy.to_csv("before_speed.csv")
-    print(consolidate)
+    # print(consolidate)
     length = len(consolidate)
     Speed_slice = consolidate["SPEED"]
-    if consolidate.loc[0,"SPEED"] <= 0:
-        speed_index = Speed_slice[Speed_slice != 0].index[0]
-        consolidate.loc[0,"SPEED"] = consolidate.loc[speed_index,"SPEED"]
-    for i in range(length):
-        if consolidate.loc[i,"SPEED"] <= 0: 
-            speed_slice = Speed_slice[0:i+1]
-            speed_index = speed_slice[speed_slice != 0].index[-1]
-            consolidate.loc[i,"SPEED"] = consolidate.loc[speed_index,"SPEED"]
+    if len(speed_line) >= 1:
+        if Speed_slice.sum() == 0:
+            consolidate["SPEED"] = 10
+        else:
+            if consolidate.loc[0,"SPEED"] <= 0:
+                speed_index = Speed_slice[Speed_slice != 0].index[0]
+                consolidate.loc[0,"SPEED"] = consolidate.loc[speed_index,"SPEED"]
+            for i in range(length):
+                if consolidate.loc[i,"SPEED"] <= 0: 
+                    speed_slice = Speed_slice[0:i+1]
+                    speed_index = speed_slice[speed_slice != 0].index[-1]
+                    consolidate.loc[i,"SPEED"] = consolidate.loc[speed_index,"SPEED"]
+    else:
+        consolidate["SPEED"] = 10
     length = len(consolidate) - 1
     column_names = ["LINE_SEGMENT","BEG MP","END MP","SPEED","LENGTH (FT)","CURVE NUMBER","DIRECTION","DEG OF CURVE","GRADE_TO_NEXT"]
     new_data = pd.DataFrame(columns=column_names)
@@ -100,7 +110,7 @@ def line_segment_loader(num):
     length = len(consolidate)
     for i in range(length):
         if consolidate.loc[i,"CURVE NUMBER"] != 0.0:
-            print(i)
+            # print(i)
             count = 0
             for j in range(i + 1,length):
                 if (consolidate.loc[j, "BEG MP"] <= consolidate.loc[i,"END MP"]) & (consolidate.loc[j,"CURVE NUMBER"] == 0.0):
@@ -133,7 +143,7 @@ def line_segment_loader(num):
         else:
             row_slice = consolidate.loc[i,:]
             new_data  = append_row(new_data , row_slice)
-    print(new_data)
+    # print(new_data)
     for i in range(len(new_data)):
         new_data.loc[i,"LENGTH (M)"] = mile_to_meter * (new_data.loc[i,"END MP"] - new_data.loc[i,"BEG MP"])
     new_data = new_data.drop_duplicates(['BEG MP','END MP','SPEED', 'GRADE_TO_NEXT'], keep='first')
@@ -147,7 +157,7 @@ def line_segment_loader(num):
     new_data.loc[0,"ELEV (M)"] = new_data.loc[0,"LENGTH (M)"] * new_data.loc[0,"GRADE_TO_NEXT"] / 100
     for i in range(len(new_data)-1):
         new_data.loc[i + 1,"ELEV (M)"] = new_data.loc[i,"ELEV (M)"] + new_data.loc[i + 1,"LENGTH (M)"] * new_data.loc[i + 1,"GRADE_TO_NEXT"] / 100
-    print(new_data)
+    # print(new_data)
     fig, ax = plt.subplots(4, 1, sharex=True)
     ax[0].plot(
         np.array(new_data["END MP"]), 
@@ -183,17 +193,19 @@ def line_segment_loader(num):
     # ax[0].set_ylim([150, 850])
     ax[3].legend()
     ax[3].set_xlabel('MP')
-    plt.tight_layout()
-    plt.show()
+    # plt.tight_layout()
+    # plt.show()
     new_data.to_csv("after_curve.csv")
     consolidate.to_csv("after_speed.csv")
     return new_data
 line_segments = [1,2,3]
 line_segments = grades["LINE_SEGMENT"].unique()
-line_segments = [485]
 for line_segment in line_segments:
-    line_segment_name = str(line_segment)
-    document_name = "line segment " + line_segment_name + ".csv"
-    Line_segment_df = line_segment_loader(line_segment)
-    Line_segment_df.to_csv(document_name)
+    if line_segment >= 424:
+        line_segment_name = str(line_segment)
+        print("Starting: ", line_segment_name)
+        document_name = "line segment " + line_segment_name + ".csv"
+        Line_segment_df = line_segment_loader(line_segment)
+        print(line_segment_name + " Done")
+        Line_segment_df.to_csv(document_name)
 line_segments = grades["LINE_SEGMENT"].unique()
