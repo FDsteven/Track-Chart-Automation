@@ -5,8 +5,8 @@ import regex as re
 Input_data_path = "Processed csvs/"
 Output_data_path = "Crew Districts/"
 Master_listing = pd.read_csv("BNSF Crew Districts.csv")
-Master_listing = pd.read_excel("BNSF-segments-JP.xlsx")
-Master_listing = pd.read_excel("BNSF-segments-Truman.xlsx")
+# Master_listing = pd.read_excel("BNSF-segments-JP.xlsx")
+# Master_listing = pd.read_excel("BNSF-segments-Truman.xlsx")
 print(Master_listing)
 Master_listing['Begin MP 1'] = pd.to_numeric(Master_listing['Begin MP 1'], errors='coerce')
 Master_listing['Begin MP 2'] = pd.to_numeric(Master_listing['Begin MP 2'], errors='coerce')

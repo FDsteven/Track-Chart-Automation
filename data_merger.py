@@ -9,10 +9,10 @@ def append_row(df, row):
                 pd.DataFrame([row])]
            ).reset_index(drop=True)
 Input_data_path = "Track Chart csvs/"
-grades = pd.read_csv(Input_data_path + "bnsf-grades-all.csv")
+grades = pd.read_csv(Input_data_path + "bnsf-grades-all-cleaned.csv")
 curves = pd.read_csv(Input_data_path + "bnsf-curves-all.csv")
 speed = pd.read_csv(Input_data_path + "bnsf-speed-all.csv")
-grades["LINE_SEGMENT"] = grades["LINE_SEGMENT"].str.replace(',', '')
+# grades["LINE_SEGMENT"] = grades["LINE_SEGMENT"].str.replace(',', '')
 grades["LINE_SEGMENT"] = grades["LINE_SEGMENT"].astype(float)
 curves["LINE_SEGMENT"] = curves["LINE_SEGMENT"].str.replace(',', '')
 curves["LINE_SEGMENT"] = curves["LINE_SEGMENT"].astype(float)
@@ -199,13 +199,14 @@ def line_segment_loader(num):
     consolidate.to_csv("after_speed.csv")
     return new_data
 line_segments = [1,2,3]
+grades["LINE_SEGMENT"] = pd.to_numeric(grades["LINE_SEGMENT"], errors='coerce')
 line_segments = grades["LINE_SEGMENT"].unique()
+print(line_segments)
 for line_segment in line_segments:
-    if line_segment >= 424:
-        line_segment_name = str(line_segment)
-        print("Starting: ", line_segment_name)
-        document_name = "line segment " + line_segment_name + ".csv"
-        Line_segment_df = line_segment_loader(line_segment)
-        print(line_segment_name + " Done")
-        Line_segment_df.to_csv(document_name)
+    line_segment_name = str(line_segment)
+    print("Starting: ", line_segment_name)
+    document_name = "line segment " + line_segment_name + ".csv"
+    Line_segment_df = line_segment_loader(line_segment)
+    print(line_segment_name + " Done")
+    Line_segment_df.to_csv(document_name)
 line_segments = grades["LINE_SEGMENT"].unique()
