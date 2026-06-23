@@ -9,7 +9,7 @@ def append_row(df, row):
                 pd.DataFrame([row])]
            ).reset_index(drop=True)
 constant_speed = 40 #mph
-corridor_name = "TXU Oak Grove"
+corridor_name = "CapMetro Alignment"
 grades = pd.read_csv(corridor_name + " grades.csv")
 curves = pd.read_csv(corridor_name + " curves.csv")
 # speed = pd.read_csv(Input_data_path + "bnsf-speed-all.csv")
@@ -159,8 +159,8 @@ new_data = new_data.reset_index(drop=True)
 new_data.loc[0,"ELEV (M)"] = new_data.loc[0,"LENGTH (M)"] * new_data.loc[0,"GRADE_TO_NEXT"] / 100
 for i in range(len(new_data)-1):
     new_data.loc[i + 1,"ELEV (M)"] = new_data.loc[i,"ELEV (M)"] + new_data.loc[i + 1,"LENGTH (M)"] * new_data.loc[i + 1,"GRADE_TO_NEXT"] / 100
-# print(new_data)
-fig, ax = plt.subplots(4, 1, sharex=True)
+print(new_data)
+fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     np.array(new_data["END MP"]), 
     np.array(new_data["ELEV (M)"]),
@@ -170,31 +170,31 @@ ax[0].set_ylabel('Elev (M)')
 # ax[0].set_ylim([150, 850])
 ax[0].legend()
 
+# ax[-1].plot(
+#     np.array(new_data["END MP"]), 
+#     np.array(new_data["SPEED"]),
+#     label='speed',
+# )
+# ax[-1].set_ylabel('speed')
+# ax[-1].legend()
 ax[1].plot(
-    np.array(new_data["END MP"]), 
-    np.array(new_data["SPEED"]),
-    label='speed',
-)
-ax[1].set_ylabel('speed')
-ax[1].legend()
-ax[2].plot(
     np.array(new_data["END MP"]), 
     np.array(new_data["Curvature (degrees)"]),
     label="Track Curvature"
 )
-ax[2].set_ylabel('Degree')
+ax[1].set_ylabel('Degree')
+# ax[0].set_ylim([150, 850])
+ax[1].legend()
+ax[1].set_xlabel('MP')
+ax[2].plot(
+    np.array(new_data["END MP"]), 
+    np.array(new_data["GRADE_TO_NEXT"]),
+    label="Track Grade"
+)
+ax[2].set_ylabel('Grade')
 # ax[0].set_ylim([150, 850])
 ax[2].legend()
 ax[2].set_xlabel('MP')
-ax[3].plot(
-    np.array(new_data["END MP"]), 
-    np.array(new_data["GRADE_TO_NEXT"]),
-    label="Track Curvature"
-)
-ax[3].set_ylabel('Grade')
-# ax[0].set_ylim([150, 850])
-ax[3].legend()
-ax[3].set_xlabel('MP')
 # plt.tight_layout()
 plt.show()
 new_data.to_csv("after_curve.csv")
